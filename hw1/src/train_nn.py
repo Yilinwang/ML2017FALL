@@ -1,5 +1,6 @@
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import KFold
+from scipy.special import expit
 import pandas as pd
 import numpy as np
 import pickle
@@ -35,7 +36,7 @@ def df2feature(df, df_scaled):
         tmpdf_scaled = df_scaled[i:i+10]
         date = tmpdf.index.get_level_values('日期')
         if not (max(date) - min(date)).days > 1:
-            x.append(tmpdf_scaled[['PM2.5', 'PM10', 'NO2', 'NOx', 'SO2', 'AMB_TEMP', 'O3', 'RH']].values[:-1].flatten())
+            x.append(tmpdf_scaled.values[:-1].flatten())
             y.append(tmpdf['PM2.5'].values[-1])
     x = np.array(x)
     x = np.hstack([np.ones((len(x), 1)), x])
@@ -43,7 +44,11 @@ def df2feature(df, df_scaled):
 
 
 def testdf2feature(df):
-    return df.groupby(level=[0]).apply(lambda df: df[['PM2.5', 'PM10', 'NO2', 'NOx', 'SO2', 'AMB_TEMP', 'O3', 'RH']].stack().reset_index(0, drop=True))
+    return df.groupby(level=[0]).apply(lambda df: df.stack().reset_index(0, drop=True))
+
+
+def ada(x):
+    return ((x ** 2).sum()) ** 0.5
 
 
 def gdfit(x, y, w1, b1, w2, b2, lr):
@@ -51,7 +56,7 @@ def gdfit(x, y, w1, b1, w2, b2, lr):
     w2_sum = np.zeros(w2.shape)
     b1_sum = np.zeros(b1.shape)
     b2_sum = 0
-    for i in np.random.choice(len(x), 1000, replace=False):
+    for i in np.random.choice(len(x), 128, replace=False):
         d1 = (-2) * (y[i] - h(w1, b1, w2, b2, x[i]))
         a = np.dot(w1, x[i]) + b1
         ds = dactivation(a)
@@ -61,19 +66,26 @@ def gdfit(x, y, w1, b1, w2, b2, lr):
             b1_sum[r] += tmp
         w2_sum += d1 * activation(a)
         b2_sum += d1
-    w1 -= lr * w1_sum / 1000
-    w2 -= lr * w2_sum / 1000
-    b1 -= lr * b1_sum / 1000
-    b2 -= lr * b2_sum / 1000
+    gdfit.w1_sum += w1_sum
+    gdfit.w2_sum += w2_sum
+    gdfit.b1_sum += b1_sum
+    gdfit.b2_sum += b2_sum
+    w1 -= (lr / ada(gdfit.w1_sum)) * w1_sum
+    w2 -= (lr / ada(gdfit.w2_sum)) * w2_sum
+    b1 -= (lr / ada(gdfit.b1_sum)) * b1_sum
+    b2 -= (lr / ada(gdfit.b2_sum)) * b2_sum
     return w1, b1, w2, b2
 
 
 def dactivation(x):
-    return np.array([0 if n < 0 else 1 for n in x])
+    #return np.array([0 if n < 0 else 1 for n in x])
+    return expit(x) * (1 - expit(x))
 
 
 def activation(x):
-    return np.array([0 if n < 0 else n for n in x])
+    #return np.array([0 if n < 0 else n for n in x])
+    #return x / (1 + np.absolute(x))
+    return expit(x)
 
 
 def h(w1, b1, w2, b2, x):
@@ -89,7 +101,7 @@ def evaluation(y_pred, y):
 
 
 def main(args):
-    np.random.seed(0)
+    np.random.seed(args.rseed)
 
     train_df, vali_df, test_df, train_df_scaled, vali_df_scaled, test_df_scaled = process_data(args.train_path, args.test_path)
     train_x, train_y = df2feature(train_df, train_df_scaled)
@@ -104,13 +116,18 @@ def main(args):
     fp = open(f'result_nn/csv_log/{args.prefix}_{args.lr}', 'w')
     fp.write('iter,train,vali\n')
 
-    k = 256
+    k = args.nlayer
     n = len(x[0])
 
     w1 = np.random.rand(k, n)
     w2 = np.random.rand(k)
     b1 = np.random.rand(k)
     b2 = np.random.rand(1)[0]
+
+    gdfit.w1_sum = np.zeros(w1.shape)
+    gdfit.w2_sum = np.zeros(w2.shape)
+    gdfit.b1_sum = np.zeros(b1.shape)
+    gdfit.b2_sum = 0
 
     for t in range(args.epoch):
         tmp_w = gdfit(train_x, train_y, w1, b1, w2, b2, args.lr)
@@ -135,6 +152,8 @@ def parse_arg():
     parser.add_argument('-e', '--epoch', default=1000, type=int)
     parser.add_argument('-l', '--lr', default=0.0001, type=float)
     parser.add_argument('-p', '--prefix', default='')
+    parser.add_argument('-n', '--nlayer', default=4, type=int)
+    parser.add_argument('-r', '--rseed', default=0, type=int)
     args = parser.parse_args()
     return args
 
