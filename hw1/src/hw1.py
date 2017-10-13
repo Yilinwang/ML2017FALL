@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import pickle
 import math
 
 
@@ -18,7 +19,7 @@ def main(args):
 
     w = np.load('model/best')
 
-    test_df = (pd.read_csv(test_path, header=None, index_col=[0, 1])
+    test_df = (pd.read_csv(args.test_path, header=None, index_col=[0, 1])
                .apply(lambda s:pd.to_numeric(s, errors='conerce')).fillna(0).groupby(0)
                .apply(lambda df: df.reset_index([0], drop=True).T))
     test_df_scaled = (test_df - mean) / std
@@ -30,7 +31,7 @@ def main(args):
     test_x = np.hstack([np.ones((len(feature_df.values), 1)), test_x])
 
     feature_df['value'] = predict(w, test_x)
-    feature_df['value'].to_csv(f'result/prediction/{args.prefix}_{args.lr}_{t}', header=True)
+    feature_df['value'].to_csv(args.output_path, header=True)
 
 
 def parse_arg():
