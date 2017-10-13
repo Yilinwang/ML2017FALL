@@ -14,8 +14,8 @@ def predict(w, vali_x):
 
 
 def main(args):
-    with open('model/scale.pkl', 'wb') as fp:
-        std, mean = pickle.load(fp)
+    with open('model/mean_std', 'rb') as fp:
+        mean, std = pickle.load(fp)
 
     w = np.load('model/best')
 
