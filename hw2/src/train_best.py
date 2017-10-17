@@ -1,3 +1,7 @@
+import sys
+sys.path.append('../tools/')
+import gmail
+
 from sklearn.model_selection import KFold
 from keras.models import Sequential
 from keras.layers import Dense, Activation
@@ -18,11 +22,6 @@ def process_data(args):
         if df_train[x].max() > 1 or df_train[x].min() < 0:
             df_test[x] = (df_test[x] - df_train[x].mean()) / df_train[x].std()
             df_train[x] = (df_train[x] - df_train[x].mean()) / df_train[x].std()
-            #df_test = pd.concat([df_test, df_test[x] ** 2], axis = 1)
-            #df_train = pd.concat([df_train, df_train[x] ** 2], axis = 1)
-
-    #df_test = (df_test - df_train.mean()) / df_train.std()
-    #df_train = (df_train - df_train.mean()) / df_train.std()
 
     return {'df_train': df_train, 'df_test': df_test, 'df_trainY': df_trainY}
 
@@ -49,12 +48,18 @@ def df2feature(df):
 def nn(x, y):
     model = Sequential()
     model.add(Dense(64, activation='relu', input_shape=(107,)))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dense(32, activation='relu'))
     model.add(Dense(32, activation='relu'))
     model.add(Dense(2, activation='sigmoid'))
     model.summary()
     model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
-    model.fit(x, y, epochs=10, batch_size=32)
     return model
+
+
+def save2file(log, path):
+    with open(path, 'w') as fp:
+        fp.write(log)
 
 
 def main(args):
@@ -64,28 +69,25 @@ def main(args):
     y = data['df_trainY']['label'].values
     y = keras.utils.to_categorical(y, 2)
 
-    kf = KFold(n_splits=3)
-    acc_t = 0
-    for train_i, test_i in kf.split(x):
-        x_train, x_test = x[train_i], x[test_i]
-        y_train, y_test = y[train_i], y[test_i]
-        model = nn(x_train, y_train)
-        r = model.evaluate(x_test, y_test, verbose=0)
-        acc_t += r[1]
-        print(r)
-    print(acc_t / 3)
-
+    early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss', patience=2)
     model = nn(x, y)
-    model.predict(df2feature(data['df_test'])).dump('result/testnn')
+    history = model.fit(x, y, validation_split=0.2, epochs=100, batch_size=32, callbacks=[early_stopping])
+    log = f"acc: {history.history['acc'][-1]}, val_acc:{history.history['val_acc'][-1]}"
+    prediction = 'id,label\n'
+    for idx, c in enumerate([0 if i[0] > i[1] else 1 for i in model.predict(df2feature(data['df_test']))]):
+        prediction += f'{idx+1},{c}\n'
 
-'''
-    w = np.matmul(np.matmul(inv(np.matmul(x.transpose(),x)),x.transpose()),y)
-    print(evaluation(y, predict(w, x)))
-    with open('result/first.csv', 'w') as fp:
-        fp.write('id,label\n')
-        for i, p in enumerate(predict(w, df2feature(data['df_test']))):
-            fp.write(f'{i+1},{p}\n')
-'''
+    model.save(f'result/model/{args.prefix}')
+    save2file(prediction, f'result/prediction/{args.prefix}.csv')
+    save2file(log, f'result/log/{args.prefix}')
+
+    email_config = {
+        'from': 'yentingg.lee@gmail.com',
+        'to': 'linda.yilin@gmail.com',
+        'password': '54YT52!)',
+        'mail_server': 'smtp.gmail.com:587',
+    }
+    gmail.email_message(email_config, f'result of {args.prefix}', content=log, email_data=[{'name': 'prediction.csv', 'data': prediction}])
 
 
 def parse_args():
@@ -94,6 +96,7 @@ def parse_args():
     parser.add_argument('-x', '--trainX_path', default='./data/X_train')
     parser.add_argument('-y', '--trainY_path', default='./data/Y_train')
     parser.add_argument('-t', '--testX_path', default='./data/X_test')
+    parser.add_argument('-p', '--prefix')
     args = parser.parse_args()
     return args
 
