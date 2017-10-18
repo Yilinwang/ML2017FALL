@@ -49,8 +49,6 @@ def nn(x, y):
     model = Sequential()
     model.add(Dense(64, activation='relu', input_shape=(107,)))
     model.add(Dropout(0.2))
-    model.add(Dense(64, activation='relu'))
-    model.add(Dropout(0.2))
     model.add(Dense(32, activation='relu'))
     model.add(Dropout(0.2))
     model.add(Dense(32, activation='relu'))
