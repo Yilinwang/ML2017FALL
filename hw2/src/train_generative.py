@@ -1,6 +1,7 @@
 from scipy.special import expit
 import pandas as pd
 import numpy as np
+import pickle
 
 
 
@@ -13,11 +14,6 @@ def process_data(args):
         if df_train[x].max() > 1 or df_train[x].min() < 0:
             df_test[x] = (df_test[x] - df_train[x].mean()) / df_train[x].std()
             df_train[x] = (df_train[x] - df_train[x].mean()) / df_train[x].std()
-            #df_test = pd.concat([df_test, df_test[x] ** 2], axis = 1)
-            #df_train = pd.concat([df_train, df_train[x] ** 2], axis = 1)
-
-    #df_test = (df_test - df_train.mean()) / df_train.std()
-    #df_train = (df_train - df_train.mean()) / df_train.std()
 
     return {'df_train': df_train, 'df_test': df_test, 'df_trainY': df_trainY}
 
@@ -90,7 +86,7 @@ def predict(model, x):
     return np.around(sigmoid(np.dot(w, x) + b))
 
 
-def main(args):
+def train(args):
     data = process_data(args)
     
     x = df2feature(data['df_train'])
@@ -104,20 +100,45 @@ def main(args):
         prefp.write('id,label\n')
         for i, p in enumerate(predict(model, df2feature(data['df_test']))):
             prefp.write(f'{i+1},{int(p)}\n')
-    import pickle
     with open(f'result/model/{args.prefix}.csv', 'wb') as fp:
         pickle.dump(model, fp)
+
+
+def infer(args):
+    data = process_data(args)
+    model = pickle.load(open('model/gene', 'rb'))
+    with open(args.output_path, 'w') as prefp:
+        prefp.write('id,label\n')
+        for i, p in enumerate(predict(model, df2feature(data['df_test']))):
+            prefp.write(f'{i+1},{int(p)}\n')
+
+
+def main(args):
+    if args.infer:
+        infer(args)
+    else:
+        train(args)
 
 
 def parse_args():
     import argparse
     parser = argparse.ArgumentParser()
+    '''
     parser.add_argument('-x', '--trainX_path', default='./data/X_train')
     parser.add_argument('-y', '--trainY_path', default='./data/Y_train')
     parser.add_argument('-t', '--testX_path', default='./data/X_test')
     parser.add_argument('-p', '--prefix')
     parser.add_argument('-e', '--epoch', type=int)
     parser.add_argument('-l', '--lr', type=float)
+    '''
+    parser.add_argument('-x', '--trainX_path')
+    parser.add_argument('-y', '--trainY_path')
+    parser.add_argument('-t', '--testX_path')
+    parser.add_argument('-p', '--prefix')
+    parser.add_argument('-e', '--epoch', type=int)
+    parser.add_argument('-l', '--lr', type=float)
+    parser.add_argument('-i', '--infer', action='store_true')
+    parser.add_argument('-o', '--output_path')
     args = parser.parse_args()
     return args
 
