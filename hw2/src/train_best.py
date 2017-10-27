@@ -89,7 +89,7 @@ def main(args):
     email_config = {
         'from': 'yentingg.lee@gmail.com',
         'to': 'linda.yilin@gmail.com',
-        'password': 'PASSWORD',
+        'password': '54UT52!)',
         'mail_server': 'smtp.gmail.com:587',
     }
     gmail.email_message(email_config, f'result of {args.prefix}', content=log, email_data=[{'name': 'prediction.csv', 'data': prediction}])
