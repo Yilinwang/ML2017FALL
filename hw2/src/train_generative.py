@@ -6,9 +6,9 @@ import pickle
 
 
 def process_data(args):
-    df_train = pd.read_csv('data/X_train')
-    df_trainY = pd.read_csv('data/Y_train')
-    df_test = pd.read_csv('data/X_test')
+    df_train = pd.read_csv(args.trainX_path)
+    df_trainY = pd.read_csv(args.trainY_path)
+    df_test = pd.read_csv(args.testX_path)
 
     for x in df_train:
         if df_train[x].max() > 1 or df_train[x].min() < 0:
@@ -123,14 +123,6 @@ def main(args):
 def parse_args():
     import argparse
     parser = argparse.ArgumentParser()
-    '''
-    parser.add_argument('-x', '--trainX_path', default='./data/X_train')
-    parser.add_argument('-y', '--trainY_path', default='./data/Y_train')
-    parser.add_argument('-t', '--testX_path', default='./data/X_test')
-    parser.add_argument('-p', '--prefix')
-    parser.add_argument('-e', '--epoch', type=int)
-    parser.add_argument('-l', '--lr', type=float)
-    '''
     parser.add_argument('-x', '--trainX_path')
     parser.add_argument('-y', '--trainY_path')
     parser.add_argument('-t', '--testX_path')
