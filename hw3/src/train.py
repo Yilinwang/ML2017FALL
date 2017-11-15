@@ -1,4 +1,5 @@
 from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 
 
@@ -10,6 +11,8 @@ def train(args):
 
     filepath = 'model/' + args.prefix + args.model + '_{epoch:03d}_{val_acc:.2f}'
     checkpoint = ModelCheckpoint(filepath)
+
+    datagen = ImageDataGenerator(rotation_range=20, horizontal_flip=True, turewise_std_normalization=True
 
     earlyStopping = EarlyStopping(monitor='loss', patience=3)
 
@@ -32,7 +35,7 @@ def main(args):
     import tensorflow as tf
     from keras.backend.tensorflow_backend import set_session
     config = tf.ConfigProto()
-    config.gpu_options.per_process_gpu_memory_fraction = 0.1
+    config.gpu_options.allow_growth = True
     set_session(tf.Session(config=config))
 
     if args.infer:
