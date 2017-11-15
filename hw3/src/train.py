@@ -14,7 +14,7 @@ def train(args):
     earlyStopping = EarlyStopping(monitor='loss', patience=3)
 
     callbacks_list = [checkpoint, earlyStopping]
-    history = model.fit(data['X'], data['Y'], validation_split=0.2, epochs=100, batch_size=128, callbacks=callbacks_list)
+    history = model.fit(data['X'], data['Y'], validation_split=0.2, epochs=100, batch_size=32, callbacks=callbacks_list)
 
 
 def infer(args):
