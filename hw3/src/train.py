@@ -1,4 +1,5 @@
 from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 
 
@@ -13,8 +14,16 @@ def train(args):
 
     earlyStopping = EarlyStopping(monitor='loss', patience=3)
 
+    datagen = ImageDataGenerator(rotation_range=20, horizontal_flip=True, zoom_range=0.2)
+    vali_datagen = ImageDataGenerator()
+
     callbacks_list = [checkpoint, earlyStopping]
-    history = model.fit(data['X'], data['Y'], validation_split=0.2, epochs=100, batch_size=32, callbacks=callbacks_list)
+    #history = model.fit(data['X'], data['Y'], validation_split=0.1, epochs=100, batch_size=32, callbacks=callbacks_list)
+    
+    vali_size = data['X'].shape[0] // 10
+    train_X, train_Y = data['X'][:-vali_size], data['Y'][:-vali_size]
+    vali_X, vali_Y = data['X'][-vali_size:], data['Y'][-vali_size:]
+    history = model.fit_generator(datagen.flow(train_X, train_Y, batch_size=32), validation_data=vali_datagen.flow(vali_X, vali_Y), steps_per_epoch=len(data['X']) / 32, validation_steps= vali_X.shape[0] / 32, epochs=100, callbacks=callbacks_list)
 
 
 def infer(args):
