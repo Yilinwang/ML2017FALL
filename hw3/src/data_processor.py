@@ -13,24 +13,24 @@ def read_train_data(path):
             Y.append(y)
     X = np.array(X)
     X = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
-    return X.reshape((len(X), 48, 48, 1)), np.array(Y)
+    return X.reshape((len(X), 48, 48, 1)), np.array(Y), np.mean(X, axis=0), np.std(X, axis=0)
 
 
-def read_test_data(path):
+def read_test_data(path, mean, std):
     X = list()
     for idx, line in enumerate(open(path)):
         if idx != 0:
             feature = line.split(',')[1]
             X.append(np.array([float(x) for x in feature.split(' ')]))
     X = np.array(X)
-    X = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
+    X = (X - mean) / std
     return X.reshape((len(X), 48, 48, 1))
             
 
 def process_data(train_path, test_path):
     data = dict()
     print('------ READING DATA ------')
-    data['X'], data['Y'] = read_train_data(train_path)
-    data['X_test'] = read_test_data(test_path)
+    data['X'], data['Y'], mean, std = read_train_data(train_path)
+    data['X_test'] = read_test_data(test_path, mean, std)
     print('------ READ DATA FINISHED ------')
     return data

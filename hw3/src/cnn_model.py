@@ -74,10 +74,78 @@ def caccaccaccaff_large():
     return model
 
 
-def caccaccaccaff_l():
+def caccaccalclcaff_l():
     model = Sequential()
 
     lamb = 0.0001
+
+    model.add(Conv2D(32, (3, 3), padding='valid', kernel_regularizer=l2(lamb), input_shape=(48, 48, 1)))
+    model.add(ZeroPadding2D())
+    model.add(BatchNormalization())
+    model.add(LeakyReLU(0.05))
+    model.add(Dropout(0.25))
+
+    model.add(AveragePooling2D((2, 2)))
+
+    model.add(Conv2D(64, (3, 3), padding='valid', kernel_regularizer=l2(lamb)))
+    model.add(ZeroPadding2D())
+    model.add(BatchNormalization())
+    model.add(LeakyReLU(0.05))
+    model.add(Dropout(0.25))
+
+    model.add(Conv2D(64, (3, 3), padding='valid', kernel_regularizer=l2(lamb)))
+    model.add(ZeroPadding2D())
+    model.add(BatchNormalization())
+    model.add(LeakyReLU(0.05))
+    model.add(Dropout(0.25))
+
+    model.add(AveragePooling2D((2, 2)))
+
+    model.add(Conv2D(128, (3, 3), padding='valid', kernel_regularizer=l2(lamb)))
+    model.add(ZeroPadding2D())
+    model.add(BatchNormalization())
+    model.add(LeakyReLU(0.05))
+    model.add(Dropout(0.25))
+
+    model.add(Conv2D(128, (3, 3), padding='valid', kernel_regularizer=l2(lamb)))
+    model.add(ZeroPadding2D())
+    model.add(BatchNormalization())
+    model.add(LeakyReLU(0.05))
+    model.add(Dropout(0.25))
+
+    model.add(AveragePooling2D((2, 2)))
+
+    model.add(Conv2D(256, (3, 3), padding='valid', kernel_regularizer=l2(lamb)))
+    model.add(ZeroPadding2D())
+    model.add(BatchNormalization())
+    model.add(LeakyReLU(0.05))
+    model.add(Dropout(0.25))
+
+    model.add(Conv2D(256, (3, 3), padding='valid', kernel_regularizer=l2(lamb)))
+    model.add(ZeroPadding2D())
+    model.add(BatchNormalization())
+    model.add(LeakyReLU(0.05))
+    model.add(Dropout(0.25))
+
+    model.add(AveragePooling2D((2, 2)))
+
+    model.add(Flatten())
+    model.add(Dense(output_dim=1024, kernel_regularizer=l2(lamb)))
+    model.add(LeakyReLU(0.05))
+    model.add(Dropout(0.25))
+    model.add(Dense(output_dim=1024, kernel_regularizer=l2(lamb)))
+    model.add(LeakyReLU(0.05))
+    model.add(Dropout(0.25))
+    model.add(Dense(output_dim=7, kernel_regularizer=l2(lamb)))
+    model.add(Activation('softmax'))
+
+    return model
+
+
+def caccaccaccaff_l():
+    model = Sequential()
+
+    lamb = 0.00001
 
     model.add(Conv2D(32, (3, 3), padding='valid', kernel_regularizer=l2(lamb), input_shape=(48, 48, 1)))
     model.add(ZeroPadding2D())
