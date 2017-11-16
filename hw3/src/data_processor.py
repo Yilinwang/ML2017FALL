@@ -25,7 +25,7 @@ def read_test_data(path, mean, std):
     X = np.array(X)
     #X = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
     return X.reshape((len(X), 48, 48, 1))
-            
+
 
 def process_data(train_path, test_path):
     import pickle

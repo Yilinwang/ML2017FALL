@@ -655,20 +655,20 @@ def ta():
     model.add(Dense(7, activation='softmax'))
 
     return model
-    
 
 
-def caccaccaccaff_nr():
+def vgg4_noreg():
     model = Sequential()
 
-    lamb = 0
+    lamb = 0.000001
 
-    model.add(Conv2D(32, (3, 3), padding='valid', kernel_regularizer=l2(lamb), input_shape=(48, 48, 1)))
+    model.add(Conv2D(64, (3, 3), padding='valid', kernel_regularizer=l2(lamb), input_shape=(48, 48, 1)))
     model.add(ZeroPadding2D())
     model.add(BatchNormalization())
     model.add(Activation('relu'))
     model.add(Dropout(0.25))
 
+    model.add(Conv2D(64, (3, 3), padding='valid', kernel_regularizer=l2(lamb)))
     model.add(AveragePooling2D((2, 2)))
 
     model.add(Conv2D(64, (3, 3), padding='valid', kernel_regularizer=l2(lamb)))
@@ -699,13 +699,13 @@ def caccaccaccaff_nr():
 
     model.add(AveragePooling2D((2, 2)))
 
-    model.add(Conv2D(128, (3, 3), padding='valid', kernel_regularizer=l2(lamb)))
+    model.add(Conv2D(256, (3, 3), padding='valid', kernel_regularizer=l2(lamb)))
     model.add(ZeroPadding2D())
     model.add(BatchNormalization())
     model.add(Activation('relu'))
     model.add(Dropout(0.25))
 
-    model.add(Conv2D(128, (3, 3), padding='valid', kernel_regularizer=l2(lamb)))
+    model.add(Conv2D(256, (3, 3), padding='valid', kernel_regularizer=l2(lamb)))
     model.add(ZeroPadding2D())
     model.add(BatchNormalization())
     model.add(Activation('relu'))
@@ -858,12 +858,12 @@ def ccmccaccaccaff_n2():
     return model
 
 
-def ccmccaccaccaff_n3():
+def ccaccaccaccaff():
     model = Sequential()
 
-    lamb = 0.0001
+    lamb = 0.000001
 
-    model.add(Conv2D(32, (3, 3), padding='valid', kernel_regularizer=l2(lamb), input_shape=(48, 48, 1)))
+    model.add(Conv2D(64, (3, 3), padding='valid', kernel_regularizer=l2(lamb), input_shape=(48, 48, 1)))
     model.add(ZeroPadding2D())
     model.add(BatchNormalization())
     model.add(Activation('relu'))
