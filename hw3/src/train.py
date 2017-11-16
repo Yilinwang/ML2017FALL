@@ -54,25 +54,6 @@ def infer(args):
 def ensemble(args):
     data = getattr(data_processor, 'process_data')(args.train_path, args.test_path)
 
-    model = []
-    model.append(load_model('model/data_augccaccaccaccaff_067_0.67'))
-    model.append(load_model('model/data_augccaccaccaccaff_058_0.67'))
-    model.append(load_model('model/data_augcaccaccaccaff_079_0.67'))
-
-    X_test = data['X_test']
-    pred = model[0].predict(data['X_test'])
-    pred += model[1].predict(data['X_test'])
-    pred += model[2].predict(data['X_test'])
-
-    with open(args.output, 'w') as fp:
-        fp.write('id,label\n')
-        for idx, p in enumerate(pred):
-            fp.write(str(idx) + ',' + str(np.argmax(p)) + '\n')
-
-
-def ensemble(args):
-    data = getattr(data_processor, 'process_data')(args.train_path, args.test_path)
-
     model=[]
     model.append(load_model('model/ccaccaccaccaff_da_062_0.67'))
     model.append(load_model('model/ccaccaccaccaff_da_063_0.67'))
