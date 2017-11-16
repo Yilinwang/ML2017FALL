@@ -52,7 +52,7 @@ def infer(args):
 
 
 def ensemble(args):
-    data = getattr(data_processor, 'process_data')(args.train_path, args.test_path)
+    data = getattr(data_processor, 'read_test_data')(args.test_path)
 
     model=[]
     model.append(load_model('model/ccaccaccaccaff_da_062_0.67'))
@@ -61,7 +61,7 @@ def ensemble(args):
     model.append(load_model('model/ccaccaccaccaff_da_074_0.67'))
     model.append(load_model('model/dac4leaky_066_0.67'))
 
-    X_test = data['X_test']
+    X_test = data
     pred = model[0].predict(X_test)
     pred += model[1].predict(X_test)
     pred += model[2].predict(X_test)

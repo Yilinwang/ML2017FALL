@@ -16,7 +16,7 @@ def read_train_data(path):
     return X.reshape((len(X), 48, 48, 1)), np.array(Y), np.mean(X, axis=0), np.std(X, axis=0)
 
 
-def read_test_data(path, mean, std):
+def read_test_data(path):
     X = list()
     for idx, line in enumerate(open(path)):
         if idx != 0:
