@@ -7,7 +7,8 @@ import numpy as np
 
 
 def train(args):
-    data = getattr(data_processor, 'process_data')(args.train_path, args.test_path)
+    #data = getattr(data_processor, 'process_data')(args.train_path, args.test_path)
+    X, Y = getattr(data_processor, 'read_train_data')(args.train_path)
     model = cnn_model.get_model(args.model)
 
     filepath = 'model/' + args.prefix + args.model + '_{epoch:03d}_{val_acc:.2f}'
@@ -22,6 +23,8 @@ def train(args):
                                  height_shift_range=0.2,
                                  shear_range=0.2)
     vali_datagen = ImageDataGenerator()
+
+    data = {'X': X, 'Y': Y}
 
     permu = np.random.permutation(data['X'].shape[0])
     data['X'] = data['X'][permu]

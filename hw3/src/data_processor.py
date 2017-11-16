@@ -13,7 +13,7 @@ def read_train_data(path):
             Y.append(y)
     X = np.array(X)
     #X = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
-    return X.reshape((len(X), 48, 48, 1)), np.array(Y), np.mean(X, axis=0), np.std(X, axis=0)
+    return X.reshape((len(X), 48, 48, 1)), np.array(Y)
 
 
 def read_test_data(path):
