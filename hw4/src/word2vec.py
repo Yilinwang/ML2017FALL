@@ -39,7 +39,7 @@ class Word2Vec:
 
     def train(self):
         print("----Word2Vec model training----")
-        self.sentences = Sentences(['data/training_label.txt', 'data/training_nolabel.txt'])
+        self.sentences = Sentences(['data/training_label.txt', 'data/training_nolabel.txt', 'data/testing_data.txt'])
         self.model = gensim.models.Word2Vec(self.sentences)
 
     def getwv(self, sentence, max_len = 0):

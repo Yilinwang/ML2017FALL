@@ -28,7 +28,7 @@ def read_test_data(path):
     wvmodel = pickle.load(open('model/word2vec', 'rb'))
     for idx, line in enumerate(open(path)):
         if idx != 0:
-            sentence = line.split(',')[-1]
+            sentence = line.split(',', 1)[-1]
             X.append(wvmodel.getwv(sentence, 41))
     X = np.array(X)
     return X
