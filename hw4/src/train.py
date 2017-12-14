@@ -50,12 +50,6 @@ def ensemble(args):
 
 
 def main(args):
-    import tensorflow as tf
-    from keras.backend.tensorflow_backend import set_session
-    config = tf.ConfigProto(allow_soft_placement = True)
-    config.gpu_options.allow_growth = True
-    set_session(tf.Session(config=config))
-
     if args.infer:
         infer(args)
     elif args.ensemble:
