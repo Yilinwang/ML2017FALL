@@ -5,6 +5,17 @@ import pickle
 
 
 
+def norm2(path):
+    X = list()
+    Y = list()
+    for idx, line in enumerate(open(path)):
+        if idx != 0:
+            dataid, userid, movieid, rating = [int(x) for x in line.strip().split(',')]
+            X.append((userid, movieid))
+            Y.append(rating)
+    return X, (np.array(Y) - 1) / 4
+
+
 def norm(path):
     X = list()
     Y = list()

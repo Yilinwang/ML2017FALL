@@ -29,6 +29,10 @@ def train(args):
     history = model.fit(unpack(X_train), Y_train, validation_data = (unpack(X_test), Y_test), callbacks = callbacks_list, batch_size = 32, epochs = 100)
 
 
+def loss(y, y_pred):
+    return (sum([(a - b) ** 2 for a, b in zip(y, y_pred)]) / len(y)) ** (1/2)
+
+
 def vali(args):
     X, Y = getattr(data_processor, args.prepro)(args.train_path)
     model = load_model(args.weight)
@@ -36,8 +40,7 @@ def vali(args):
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.1, random_state = 1126)
     
     Y_pred = model.predict(unpack(X_test))
-    print(Y_pred)
-    print(mean_squared_error(Y_test, Y_pred))
+    print(loss(Y_test, Y_pred * 5))
 
 
 def infer(args):
@@ -47,20 +50,29 @@ def infer(args):
     with open(args.output, 'w') as fp:
         fp.write('TestDataID,Rating\n')
         for idx, p in enumerate(model.predict(unpack(X))):
-            fp.write(str(idx+1) + ',' + str(p) + '\n')
+            rating = max(min(p[0], 5), 0)
+            fp.write(str(idx+1) + ',' + str(rating) + '\n')
 
 
 def ensemble(args):
     X_test = getattr(data_processor, 'read_test_data')(args.test_path)
 
     models = []
-    pred = models[0].predict(X_test)
+    models.append(load_model('model/sysloss_basic_005_0.80'))
+    models.append(load_model('model/_basic_64_020_0.81'))
+    models.append(load_model('model/rmsprop_basic_020_0.81'))
+
+    pred = models[0].predict(unpack(X_test))
+    pred += models[1].predict(unpack(X_test))
+    pred += models[2].predict(unpack(X_test))
+
+    pred = pred / 3
 
     with open(args.output, 'w') as fp:
-        fp.write('id,label\n')
+        fp.write('TestDataID,Rating\n')
         for idx, p in enumerate(pred):
-            print(idx, p)
-            fp.write(str(idx) + ',' + str(np.argmax(p)) + '\n')
+            rating = max(min(p[0], 5), 0)
+            fp.write(str(idx+1) + ',' + str(rating) + '\n')
 
 
 def main(args):

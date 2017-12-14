@@ -4,12 +4,52 @@ import numpy as np
 
 
 
+def basic_64d03():
+    user_input = Input(shape = (1,))
+    user_vec = Flatten()(Embedding(6041 + 1, 32, input_length = 1)(user_input))
+    user_vec = Dropout(0.3)(user_vec)
+
+    movie_input = Input(shape = (1,))
+    movie_vec = Flatten()(Embedding(3953 + 1, 32, input_length = 1)(movie_input))
+    movie_vec = Dropout(0.3)(movie_vec)
+
+    output = merge([user_vec, movie_vec], mode = 'dot')
+    model = Model([user_input, movie_input], output)
+    return model
+
+
+def bias():
+    user_input = Input(shape = (1,))
+    user_vec = Flatten()(Embedding(6041 + 1, 32, input_length = 1)(user_input))
+
+    movie_input = Input(shape = (1,))
+    movie_vec = Flatten()(Embedding(3953 + 1, 32, input_length = 1)(movie_input))
+
+    output = merge([user_vec, movie_vec], mode = 'dot')
+    model = Model([user_input, movie_input], output)
+    return model
+
+
+def basic_64():
+    user_input = Input(shape = (1,))
+    user_vec = Flatten()(Embedding(6041 + 1, 32, input_length = 1)(user_input))
+
+    movie_input = Input(shape = (1,))
+    movie_vec = Flatten()(Embedding(3953 + 1, 32, input_length = 1)(movie_input))
+
+    output = merge([user_vec, movie_vec], mode = 'dot')
+    model = Model([user_input, movie_input], output)
+    return model
+
+
 def basic_256():
     user_input = Input(shape = (1,))
     user_vec = Flatten()(Embedding(6041 + 1, 256, input_length = 1)(user_input))
+    user_vec = Dropout(0.5)(user_vec)
 
     movie_input = Input(shape = (1,))
     movie_vec = Flatten()(Embedding(3953 + 1, 256, input_length = 1)(movie_input))
+    movie_vec = Dropout(0.5)(movie_vec)
 
     output = merge([user_vec, movie_vec], mode = 'dot')
     model = Model([user_input, movie_input], output)
