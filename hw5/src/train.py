@@ -17,7 +17,7 @@ def unpack(X):
 
 def train(args):
     X, Y = getattr(data_processor, args.prepro)(args.train_path)
-    model = models.get_model(args.model)
+    model = models.get_model(args.model, args.dim)
 
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.1, random_state = 1126)
 
@@ -40,7 +40,8 @@ def vali(args):
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.1, random_state = 1126)
     
     Y_pred = model.predict(unpack(X_test))
-    print(loss(Y_test, Y_pred * 5))
+    mean, std = pickle.load(open('model/norm_weight.pkl', 'rb'))
+    print(loss(Y_test, (Y_pred * std) + mean))
 
 
 def infer(args):
@@ -58,15 +59,21 @@ def ensemble(args):
     X_test = getattr(data_processor, 'read_test_data')(args.test_path)
 
     models = []
-    models.append(load_model('model/sysloss_basic_005_0.80'))
-    models.append(load_model('model/_basic_64_020_0.81'))
-    models.append(load_model('model/rmsprop_basic_020_0.81'))
+    models.append(load_model('model/8_ta_011_0.76'))
+    models.append(load_model('model/4_ta_011_0.77'))
+    models.append(load_model('model/8_ta_020_0.77'))
+    models.append(load_model('model/8_ta_015_0.77'))
+    models.append(load_model('model/4_ta_022_0.77'))
+    models.append(load_model('model/4_ta_028_0.77'))
 
     pred = models[0].predict(unpack(X_test))
     pred += models[1].predict(unpack(X_test))
     pred += models[2].predict(unpack(X_test))
+    pred += models[3].predict(unpack(X_test))
+    pred += models[4].predict(unpack(X_test))
+    pred += models[5].predict(unpack(X_test))
 
-    pred = pred / 3
+    pred = pred / 6
 
     with open(args.output, 'w') as fp:
         fp.write('TestDataID,Rating\n')
@@ -105,6 +112,7 @@ def parse_args():
     parser.add_argument('--weight')
     parser.add_argument('--output')
     parser.add_argument('--model')
+    parser.add_argument('--dim', type = int)
     parser.add_argument('--prefix', default='')
     args = parser.parse_args()
     return args
